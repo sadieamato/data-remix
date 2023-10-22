@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+        hr {width: 60%;}
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Story Remix</title>
@@ -9,8 +12,8 @@
 
 <body>
 
-    <h1>Title Goes Here</h1>
-    <h4>By Sadie Amato & Other Author's Name</h4>    
+    <h1 style="text-align:center">Congress Today Is Older Than It's Ever Been</h1>
+    <h4 style="text-align:center">By Geoffrey Skelley (author) & Sadie Amato (remixer)</h4>    
 
     <!-- <label>Bar Width:</label>
     
@@ -174,6 +177,8 @@
         // where I am: currently have bars with tooltips and opacity changes with hover. have title (commented out rn) and axes labels
         // also have gridlines that i'm pretty good with. 
 
+        // need to fix tooltip position (too high in deployed page)
+
         
 
     })
@@ -204,11 +209,35 @@
 
     // read in the data
 
-
-
-
-
     </script>
+
+    <!-- Pie Charts -->
+
+    <div style="text-align: center;">
+
+        <img src="./assets/1920.png" alt="Pie chart displaying the proportion of generations in Congress in 1920." width='400px'>
+        <img src="./assets/1940.png" alt="Pie chart displaying the proportion of generations in Congress in 1940." width='400px'>
+        <img src="./assets/1960.png" alt="Pie chart displaying the proportion of generations in Congress in 1960." width='400px'>
+    
+    </div>
+
+    <div style="text-align: center;">
+
+        <img src="./assets/1980.png" alt="Pie chart displaying the proportion of generations in Congress in 1980." width='400px'>
+        <img src="./assets/2000.png" alt="Pie chart displaying the proportion of generations in Congress in 2000." width='400px'>
+        <img src="./assets/2020.png" alt="Pie chart displaying the proportion of generations in Congress in 2020." width='400px'>
+    
+    </div>
+
+    <hr>
+
+    <div style="text-align: center;">
+
+    <img src="./assets/piecharts.gif" alt="Animated sequence of pie charts displaying the proportion of generations in Congress from 1920-2020." width='700px'>
+
+    </div>
+
+
 
 
 </body>
