@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Story Remix</title>
+</head>
+
+
+<body>
+
+    <h1>Title Goes Here</h1>
+    <h4>By Sadie Amato & Other Author's Name</h4>    
+
+    <!-- <label>Bar Width:</label>
+    
+    <input type="range" id="bar-width" min="10" max="50" value="20"> -->
+
+    <script src="https://d3js.org/d3.v6.js"> </script>
+
+<!-- ------------ Chart 1 ------------- -->
+    
+    <div id="chart1"></div>
+    <script>
+
+    // set up the page
+    const margin1 = {top:30, right:50, bottom:50, left:70}, 
+        width1 = 1300 - margin1.left - margin1.right,
+        height1 = 700 - margin1.top - margin1.bottom;
+
+    const svg1 = d3.select("#chart1")
+        .append("svg").attr("width", width1 + margin1.left + margin1.right)
+        .attr("height", height1 + margin1.top + margin1.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin1.left}, ${margin1.top})`);
+
+    
+    // read in the data
+    d3.csv("OTA-approp-const2019dollars.csv", function(d) {
+        return {
+            year: d["TIMEPERIOD"],
+            funds: +d["APPROPRIATION($M)"]
+        };
+
+    }).then(function(data) {
+        console.log(data);
+        console.log(data.keys())
+
+        // Add X axis
+        const x = d3.scaleBand()
+        .range([0,width1])
+        .domain(data.map(function(d) { return d.year })) // citation for this line: https://d3-graph-gallery.com/graph/barplot_basic.html 
+        .padding(0.2);
+        
+        //Add Y axis
+        const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.funds) + 5])
+        .range([height1, 0])
+
+        // Add Y axis gridlines
+        // Citation for gridline code: https://www.essycode.com/posts/adding-gridlines-chart-d3/
+        const yAxisGrid = d3.axisLeft(y)
+        .tickSize(-width1)
+        .tickFormat('').ticks(5);
+
+        //Add gridlines to view
+        svg1.append("g")
+        .call(yAxisGrid)
+        .style("stroke-width", 0.2);
+
+
+        // Add x to view
+        svg1.append("g")
+        .attr("transform", `translate(0, ${height1})`)
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .attr("text-anchor", "end")
+        .attr("font-family", "Georgia")
+        .attr("transform", `rotate(-45)`);
+
+
+        // Add y to view
+        svg1.append("g")
+        .call(d3.axisLeft(y))
+        .attr("font-family", "Georgia");
+        
+
+        var tooltip = d3.select("#chart1")
+            .append("div")
+            .style("position", "absolute")
+            .style("visibility", "hidden")
+            .style("background-color", "white")
+
+
+        // Add bars to the graph
+        svg1.append('g')
+        .selectAll("dot")
+        .data(data)
+        .join("rect")
+        .attr("x", function (d) {return x(d.year);})
+        .attr("y", function (d) {return y(d.funds);})
+        .attr("width", x.bandwidth())
+        .attr("height", (d) => {
+            return height1 - y(d.funds); // - y(d[1]);
+        })
+        .attr("fill", "#59a14f")
+        // Here I changed the opacity on click
+        .style("opacity", .6)
+        .on("mouseover", function(e, d) {
+            d3.selectAll("rect")
+                                            .style("opacity", function (d2) {
+                                                if (d.year == d2.year) {
+                                                    return 0.9;
+                                                } else {
+                                                    return 0.6;
+                                                }});
+            return tooltip.style("visibility", "visible")
+                                            .style("font-family", "Georgia")
+                                            .html("Funds: $" + d.funds + "M");})
+        .on("mousemove", function() {
+            return tooltip.style("top", d3.select(this)
+            .attr("y") + "px")
+            .style("left", d3.select(this)
+            .attr("x") + "px")
+        })
+        .on("mouseout", function() {
+            d3.selectAll("rect")
+            .style("opacity", 0.6);
+            return tooltip.style("visibility", "hidden");
+        })
+
+        // Added title here. Citation for this section: http://www.d3noob.org/2013/01/adding-title-to-your-d3js-graph.html 
+        // customized location, font, and styling
+        // svg1.append("text")
+        // .attr("x", (width1 / 2))             
+        // .attr("y", 20 - (margin1.top / 2))
+        // .attr("text-anchor", "middle")  
+        // .attr("font-family", "Georgia")
+        // .style("font-size", "25px") 
+        // .style("background-color", "gray")
+        // .text("OTA Appropriations Over Time");
+
+        // Add the x-axis label
+        svg1.append("text")
+        .attr("x", width1 / 2)
+        .attr("y", height1 + 50)
+        .attr("text-anchor", "middle")
+        .attr("font-family", "Georgia")
+        .text("Year");
+
+
+        // Add the y-axis label
+        svg1.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", 0 - height1 / 2)
+        .attr("y", -40)
+        .attr("text-anchor", "middle")
+        .attr("font-family", "Georgia")
+        .text("Appropriations per Year, in $M");
+
+        // Example of user input changing graph: 
+        // Update the bar width based on the input value
+        d3.select("#bar-width")
+        .on("input", function() { // input is given on range above in html
+          var value = this.value;
+          x.range([0, value * data.length]);
+          svg1.selectAll("rect")
+            .attr("width", x.bandwidth());
+        });
+
+
+
+
+        // where I am: currently have bars with tooltips and opacity changes with hover. have title (commented out rn) and axes labels
+        // also have gridlines that i'm pretty good with. 
+
+        
+
+    })
+
+    
+
+      
+    </script>
+
+
+    <!-- ------------ Chart 2 ------------- -->
+        
+    <div id="chart2"></div>
+    <script>
+
+    // set up the page
+    const margin2 = {top:50, right:50, bottom:50, left:50}, 
+        width2 = 2100 - margin2.left - margin2.right,
+        height2 = 800 - margin2.top - margin2.bottom;
+
+    const svg2 = d3.select("#chart2")
+        .append("svg").attr("width", width2 + margin2.left + margin2.right)
+        .attr("height", height2 + margin2.top + margin2.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin2.left}, ${margin2.top})`);
+
+    
+
+    // read in the data
+
+
+
+
+
+    </script>
+
+
+</body>
+</html>
