@@ -3,6 +3,15 @@
 <head>
     <style>
         hr {width: 60%;}
+        p {margin-left: 9%;
+           margin-right: 9%;
+           font-family: Georgia;
+           font-size: 20px; 
+           color: #36454F;   }
+        div {margin-top: 5%;
+             margin-bottom: 5%;
+             align-content: center;}
+
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,6 +29,332 @@
     <input type="range" id="bar-width" min="10" max="50" value="20"> -->
 
     <script src="https://d3js.org/d3.v6.js"> </script>
+
+
+    <p>Older members of Congress are notorious for their lack of familiarity with modern technology. Late last month, at least three different representatives in a hearing on TikTok 
+        called the popular app “Tic Tac,” a breath mint available in many store checkout lines. This is only the latest in a long line of amusing tech-related congressional miscues: 
+        Back in 2006, Alaska Sen. Ted Stevens described the internet as “a series of tubes,” and Senate Majority Leader Chuck Schumer copped to his struggles when in 2022 he held up 
+        his flip phone and said he was “not very tech-oriented” during a speech on the Senate floor.
+        </p>    
+    <p>Don’t expect such unfamiliarity to change anytime soon: As it turns out, Congress today is older than it’s ever been. Across all senators and representatives, the median age 
+        of the 118th Congress is 59 years old. The median senator is 65 years old, a record high; the median representative is about 58, for the fourth Congress in a row.
+        Congress has notably aged since 2001: From 1919 to 1999, the median senator never eclipsed 60 years old and the median representative never surpassed 55.2
+    </p>
+
+    <!-- ------------ Chart 2 ------------- -->
+        
+    <div id="chart2"></div>
+    <script>
+
+    // set up the page
+    const margin2 = {top:50, right:50, bottom:50, left:50}, 
+        width2 = 1300 - margin2.left - margin2.right,
+        height2 = 800 - margin2.top - margin2.bottom;
+
+    const svg2 = d3.select("#chart2")
+        .append("svg").attr("width", width2 + margin2.left + margin2.right)
+        .attr("height", height2 + margin2.top + margin2.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin2.left}, ${margin2.top})`);
+
+    
+
+    // read in the data
+
+    d3.csv("avg-ages.csv", function(d) {
+        return {
+            year: d["YEAR"],
+            congress_avg: +d["AVG-AGE-CONGRESS"],
+            house_avg: +d["AVG-AGE-HOUSE"],
+            senate_avg: +d["AVG-AGE-SENATE"]
+        };
+
+    }).then(function(data) {
+        console.log(data);
+        console.log(data.keys())
+
+        // Add X axis
+        const x = d3.scaleBand()
+        .range([0,width2])
+        .domain(data.map(function(d) { return d.year })) // citation for this line: https://d3-graph-gallery.com/graph/barplot_basic.html 
+        .padding(0.2);
+        
+        //Add Y axis
+        const y = d3.scaleLinear()
+        .domain([35, d3.max(data, d => d.senate_avg) + 5])
+        .range([height2, 0])
+
+
+        // Add x to view
+        svg2.append("g")
+        .attr("transform", `translate(0, ${height2})`)
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .attr("text-anchor", "end")
+        .attr("font-family", "Georgia")
+        .attr("transform", `rotate(-45)`);
+
+
+        // Add y to view
+        svg2.append("g")
+        .call(d3.axisLeft(y))
+        .attr("font-family", "Georgia");
+
+        
+        // Create average age lines
+        var congress_line = d3.line()
+            .x(function(d) {return x(d.year)})
+            .y(function(d) {return y(d.congress_avg)})
+
+        var house_line = d3.line()
+            .x(function(d) {return x(d.year)})
+            .y(function(d) {return y(d.house_avg)})
+
+        var senate_line = d3.line()
+            .x(function(d) {return x(d.year)})
+            .y(function(d) {return y(d.senate_avg)})
+
+
+        
+        // Append the average age lines to the chart
+        svg2.append('path')
+            .data([data])
+            .attr("class", "line")
+            .attr("d", congress_line)
+            .style("stroke", "steelblue")
+            .style("stroke-width", 3)
+            .style("fill", "none")
+
+        svg2.append('path')
+            .data([data])
+            .attr("class", "line")
+            .attr("d", house_line)
+            .style("stroke", "grey")
+            .style("stroke-width", 3)
+            .style("fill", "none")
+
+        svg2.append('path')
+            .data([data])
+            .attr("class", "line")
+            .attr("d", senate_line)
+            .style("stroke", "black")
+            .style("stroke-width", 3)
+            .style("fill", "none")
+
+        
+        // Add Y axis gridlines
+        // Citation for gridline code: https://www.essycode.com/posts/adding-gridlines-chart-d3/
+        const yAxisGrid = d3.axisLeft(y)
+            .tickSize(-width2)
+            .tickFormat('').ticks(5);
+
+        //Add gridlines to view
+        svg2.append("g")
+            .call(yAxisGrid)
+            .style("stroke-width", 0.2);
+
+        
+
+        // Create tooltip
+        var tooltip = d3.select("#chart2")
+            .append("div")
+            .style("position", "absolute")
+            .style("visibility", "hidden")
+            .style("background-color", "white")   
+
+
+
+        // Append dots for each data point for extra styling and to enable tooltips
+        // First for congress avg
+
+        const circleEnter = svg2.selectAll("circle") // citation for setting up multiple sets of circles: https://stackoverflow.com/questions/61297171/how-can-i-draw-circles-for-two-different-columns-in-d3-v5
+            .data(data)
+            .enter();
+            
+
+        circleEnter.append("circle")
+            .attr("r", 3)
+            .attr("cx", function (d) {return x(d.year);})
+            .attr("cy", function (d) {return y(d.congress_avg);})
+            .style("fill","none")
+            .style("stroke","steelblue")
+            .style("pointer-events","all")
+            .on("mouseover", function(e, d) {
+                console.log("Moused over");
+                return tooltip.style("visibility", "visible")
+                                            .style("font-family", "Georgia")
+                                            .html("Age: " + d.congress_avg);})
+            .on("mousemove", function() {
+                console.log("Mouse move");
+                return tooltip.style("top", (+d3.select(this)
+                .attr("cy")+375)+ "px")
+                .style("left", d3.select(this)
+                .attr("cx") + "px")
+            })
+            .on("mouseout", function() {
+                console.log("Moused out");
+                return tooltip.style("visibility", "hidden");
+            })
+            //.append("title")
+            //.text(function(d) { return "Year: " + d.year + " Age: " + d.senate_avg; });
+
+        // Then for senate avg    
+        circleEnter.append("circle")
+            .attr("r", 3)
+            .attr("cx", function (d) {return x(d.year);})
+            .attr("cy", function (d) {return y(d.senate_avg);})
+            .style("fill","none")
+            .style("stroke","black")
+            .style("pointer-events","all")
+            .on("mouseover", function(e, d) {
+                console.log("Moused over");
+                return tooltip.style("visibility", "visible")
+                                            .style("font-family", "Georgia")
+                                            .html("Age: " + d.senate_avg);})
+            .on("mousemove", function() {
+                console.log("Mouse move");
+                return tooltip.style("top", (+d3.select(this)
+                .attr("cy")+375) + "px")
+                .style("left", d3.select(this)
+                .attr("cx") + "px")
+            })
+            .on("mouseout", function() {
+                console.log("Moused out");
+                return tooltip.style("visibility", "hidden");
+            })
+            
+
+        // Then for house avg    
+        circleEnter.append("circle")
+            .attr("r", 3)
+            .attr("cx", function (d) {return x(d.year);})
+            .attr("cy", function (d) {return y(d.house_avg);})
+            .style("fill","none")
+            .style("stroke","grey")
+            .style("pointer-events","all")
+            .on("mouseover", function(e, d) {
+                console.log("Moused over");
+                return tooltip.style("visibility", "visible")
+                                            .style("font-family", "Georgia")
+                                            .html("Age: " + d.house_avg);})
+            .on("mousemove", function() {
+                console.log("Mouse move");
+                return tooltip.style("top", (+d3.select(this)
+                .attr("cy")+375) + "px")
+                .style("left", d3.select(this)
+                .attr("cx") + "px")
+            })
+            .on("mouseout", function() {
+                console.log("Moused out");
+                return tooltip.style("visibility", "hidden");
+            })
+            
+
+
+
+        // Add the x-axis label
+        svg2.append("text")
+        .attr("x", width2 / 2)
+        .attr("y", height2 + 50)
+        .attr("text-anchor", "middle")
+        .attr("font-family", "Georgia")
+        .text("Year");
+
+
+        // Add the y-axis label
+        svg2.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", 0 - height2 / 2)
+        .attr("y", -40)
+        .attr("text-anchor", "middle")
+        .attr("font-family", "Georgia")
+        .text("Average Age");
+    })
+
+    </script>
+
+<p>What’s behind these increasingly older Congresses? The country’s aging population as a whole is chiefly responsible, which is most apparent in the disproportionate 
+    influence the baby boomer generation has on Capitol Hill. Coupled with longer-running trends that have made it more likely for members of Congress to win reelection 
+    and stick around, this has all helped make Congress older than ever before. And the overrepresentation of boomers doesn’t just produce moments like those of the 
+    TikTok hearings — it also has real effects on the type of policies passed by the federal legislature.</p>
+
+<p>Now, members of Congress have always been older than the public at large, as well as the population constitutionally eligible to serve on Capitol Hill 
+    (at least 25 years old for the House and 30 for the Senate). According to the 2020 census, the median age of the entire U.S. population was about 39, and among those 
+    25 and older, it was 51 — almost 22 and 10 years younger, respectively, than the median member of the 116th Congress was at the time. But the U.S. population is also 
+    far more elderly than in the past: As of the 2020 census, about 42 percent were 45 or older, twice the share in the same age group a century before. Of course, this is 
+    partly due to people living longer and having fewer children, which reduces the share of younger people entering the population.</p>
+
+<p>No group is more responsible for this trajectory across both the population and Congress than the baby boomer generation. While immigration has augmented the population, 
+    76 million boomers were born between 1946 and 1964, far more than the 47 million in the preceding Silent Generation, and greater than the 55 million and 62 million 
+    in the subsequent generations of Generation X and millennials, respectively. Boomers have been described as “the pig in the python” because, over time, they have 
+    formed an unusually large bulge in the nation’s population distribution. Their magnitude in the population initially helped slightly reduce the nation’s median age 
+    in the 1960 and 1970 censuses before the median started to rise again, as it has throughout the country’s history.</p>
+
+<p>Forty-eight percent of the current Congress is made up of boomers, even though they only represented about 21 percent of the population in the most recent census. 
+    And this actually represents a decline in representation for boomers, who made up 63 percent of Congress in the mid-2010s.
+</p>
+
+
+ <!-- Pie Charts -->
+
+ <div style="text-align: center;">
+
+    <img src="./assets/1920.png" alt="Pie chart displaying the proportion of generations in Congress in 1920." width='400px'>
+    <img src="./assets/1940.png" alt="Pie chart displaying the proportion of generations in Congress in 1940." width='400px'>
+    <img src="./assets/1960.png" alt="Pie chart displaying the proportion of generations in Congress in 1960." width='400px'>
+
+</div>
+
+<div style="text-align: center;">
+
+    <img src="./assets/1980.png" alt="Pie chart displaying the proportion of generations in Congress in 1980." width='400px'>
+    <img src="./assets/2000.png" alt="Pie chart displaying the proportion of generations in Congress in 2000." width='400px'>
+    <img src="./assets/2020.png" alt="Pie chart displaying the proportion of generations in Congress in 2020." width='400px'>
+
+</div>
+
+<hr>
+
+<div style="text-align: center;">
+
+<img src="./assets/piecharts.gif" alt="Animated sequence of pie charts displaying the proportion of generations in Congress from 1920-2020." width='700px'>
+
+</div>
+
+
+
+<p>Thanks to their size, baby boomers have been an especially long-lasting force in congressional politics. Boomers are now in their 25th consecutive Congress,
+     but still make up about half the membership, putting them well ahead of earlier generations. In its 25th Congress, the Silent Generation only made up about 
+    one-third of Congress, while the earlier Lost Generation made up only around a quarter at the same point.</p>
+
+<p>But on top of the baby boomers’ outsized congressional representation, they’re also older than their predecessors in the Lost, Greatest and Silent generations 
+    were when those groups held the most sway on Capitol Hill. When boomers became a plurality of Congress in 2001, their median age was nearly 49, six years older 
+    than the Silent Generation was when it became the largest generational cohort in 1979. And while the Silent Generation’s median age was 59 just before the boomers 
+    surpassed it in Congress, today the boomers’ median age is a whopping 66. It’s no wonder, then, that Congress is notably older today.</p>
+
+<p>Now, it’s no shock that members of Congress tend to be older than Americans as a whole. We know that older political leaders tend to benefit to some degree from voters 
+    who prefer experienced politicians. Additionally, older voters are more likely to vote and more likely to prefer people from their own age group, who they anticipate 
+    will serve their interests better. (This is not to say that age overshadows partisanship, but it is a factor.) And the Congressional Research Service has found that 
+    members are more likely to serve longer tenures today than they did 70 or more years ago because they’re more likely to seek reelection and win additional terms.</p>
+
+<p>But all this has consequences for how these older members represent their constituents. Broadly, we know that the makeup of Congress — whether that means race, 
+    ethnicity, age, gender, sexuality or other facets of identity — can influence which issues it addresses. As such, we’d expect older members to be more attuned 
+    to the concerns of their fellow older Americans thanks to shared worries, experiences and values. And political scientists James M. Curry and Matthew R. Haydon 
+    found evidence of exactly this: Older members of Congress were more likely to introduce legislation that addressed senior issues, especially bills dealing with 
+    high-profile issues like long-term care and prescription drugs.</p>
+
+<p>On the flip side, this also leaves us with a Congress that may not focus as much on issues that are important to younger Americans. Politicians tend to respond most 
+    to the needs and desires of constituents who are most like them, and older Americans are, for instance, less concerned about climate change than their younger counterparts. 
+    And while both younger and older Americans are worried about housing, those concerns differ: Younger Americans are having a tougher time buying a home — a traditional path 
+    to building wealth — than their predecessors did, while older Americans are more worried about access to assisted living to stay in their homes. </p>
+
+<p>
+    And as concerns over “Tic Tac” suggest, an older Congress may struggle when dealing with issues related to modern technology. But it’s not like the institution has made it 
+    easier for elderly members, either. Members don’t have deep expertise on every issue, so they need support staff and experts to help them, including on matters of technology. 
+    Yet Congress has reduced office and congressional support agency staff since the 1980s, and it has never created a successor to the Office of Technology Assessment, which 
+    Congress defunded in 1995 after it previously provided advice and expertise on science and technology issues.
+</p>
+
 
 <!-- ------------ Chart 1 ------------- -->
     
@@ -120,9 +455,17 @@
             return tooltip.style("visibility", "visible")
                                             .style("font-family", "Georgia")
                                             .html("Funds: $" + d.funds + "M");})
-        .on("mousemove", function() {
-            return tooltip.style("top", d3.select(this)
-            .attr("y") + "px")
+        .on("mousemove", function(event, d) {
+            // const[x, y] = d3.pointer(event);
+            // return tooltip.style("top", y + "py")
+            //     .style("left", x + "px")
+            // return tooltip.style("top", d3.select(this)
+            // .attr("y") + "px") 
+            // .style("left", d3.select(this)
+            // .attr("x") + "py") 
+
+            return tooltip.style("top", (+d3.select(this)
+            .attr("y")+3900) + "px")
             .style("left", d3.select(this)
             .attr("x") + "px")
         })
@@ -177,186 +520,23 @@
         // where I am: currently have bars with tooltips and opacity changes with hover. have title (commented out rn) and axes labels
         // also have gridlines that i'm pretty good with. 
 
-        // need to fix tooltip position (too high in deployed page)
+        // need to fix tooltip position (way too high in deployed page)
 
         
 
     })
 
     
-
-      
     </script>
 
-    <h1>Testing testing</h1>
+    <p style="margin-bottom: 5%;">Despite the rapid rise in Congress’s median age, we could see it plateau — or perhaps even tick down slightly — in the next few years as the boomers’ influence decreases.
+         It’s true that the population as a whole will likely continue to get older, but it will do so at a slower rate than in the past couple of decades as boomers age out of 
+         the population. Coming up behind the boomers is Gen X, which makes up 36 percent of Congress, and beyond them are millennials (10 percent), who now constitute a larger 
+         segment of the overall population than boomers. And Generation Z just got its first member of Congress this year with 26-year-old Florida Rep. Maxwell Alejandro Frost. 
+         The ceaseless march of time will go on, but that same time will indeed tell.</p>
 
-    <p>article text</p>
-    <p>article text</p>
-    <p>article text</p>
-    <p>article text</p>
-    <p>article text</p>
-    <p>article text</p>
-    <p>article text</p>
-
-    <!-- ------------ Chart 2 ------------- -->
-        
-    <div id="chart2"></div>
-    <script>
-
-    // set up the page
-    const margin2 = {top:50, right:50, bottom:50, left:50}, 
-        width2 = 2100 - margin2.left - margin2.right,
-        height2 = 800 - margin2.top - margin2.bottom;
-
-    const svg2 = d3.select("#chart2")
-        .append("svg").attr("width", width2 + margin2.left + margin2.right)
-        .attr("height", height2 + margin2.top + margin2.bottom)
-        .append("g")
-        .attr("transform", `translate(${margin2.left}, ${margin2.top})`);
-
-    
-
-    // read in the data
-
-    d3.csv("avg-ages.csv", function(d) {
-        return {
-            year: d["YEAR"],
-            congress_avg: +d["AVG-AGE-CONGRESS"],
-            house_avg: +d["AVG-AGE-HOUSE"],
-            senate_avg: +d["AVG-AGE-SENATE"]
-        };
-
-    }).then(function(data) {
-        console.log(data);
-        console.log(data.keys())
-
-        // Add X axis
-        const x = d3.scaleBand()
-        .range([0,width2])
-        .domain(data.map(function(d) { return d.year })) // citation for this line: https://d3-graph-gallery.com/graph/barplot_basic.html 
-        .padding(0.2);
-        
-        //Add Y axis
-        const y = d3.scaleLinear()
-        .domain([25, d3.max(data, d => d.senate_avg) + 5])
-        .range([height2, 0])
-
-
-        // Add x to view
-        svg2.append("g")
-        .attr("transform", `translate(0, ${height2})`)
-        .call(d3.axisBottom(x))
-        .selectAll("text")
-        .attr("text-anchor", "end")
-        .attr("font-family", "Georgia")
-        .attr("transform", `rotate(-45)`);
-
-
-        // Add y to view
-        svg2.append("g")
-        .call(d3.axisLeft(y))
-        .attr("font-family", "Georgia");
-
-        
-        // Create average age lines
-        var congress_line = d3.line()
-            .x(function(d) {return x(d.year)})
-            .y(function(d) {return y(d.congress_avg)})
-
-        var house_line = d3.line()
-            .x(function(d) {return x(d.year)})
-            .y(function(d) {return y(d.house_avg)})
-
-        var senate_line = d3.line()
-            .x(function(d) {return x(d.year)})
-            .y(function(d) {return y(d.senate_avg)})
-
-        
-
-        // Append the average age lines to the chart
-        svg2.append('path')
-        .data([data])
-        .attr("class", "line")
-        .attr("d", congress_line)
-        .style("stroke", "steelblue")
-        .style("fill", "none")
-
-        svg2.append('path')
-        .data([data])
-        .attr("class", "line")
-        .attr("d", house_line)
-        .style("stroke", "grey")
-        .style("fill", "none")
-
-        svg2.append('path')
-        .data([data])
-        .attr("class", "line")
-        .attr("d", senate_line)
-        .style("stroke", "black")
-        .style("fill", "none")
-
-
-
-        // Add the x-axis label
-        svg2.append("text")
-        .attr("x", width2 / 2)
-        .attr("y", height2 + 50)
-        .attr("text-anchor", "middle")
-        .attr("font-family", "Georgia")
-        .text("Year");
-
-
-        // Add the y-axis label
-        svg2.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", 0 - height2 / 2)
-        .attr("y", -40)
-        .attr("text-anchor", "middle")
-        .attr("font-family", "Georgia")
-        .text("Average Age");
-    })
-
-    </script>
-
-
-    <p>article text</p>
-    <p>article text</p>
-    <p>article text</p>
-    <p>article text</p>
-    <p>article text</p>
-    <p>article text</p>
-    <p>article text</p>
-
-
-
-    <!-- Pie Charts -->
-
-    <div style="text-align: center;">
-
-        <img src="./assets/1920.png" alt="Pie chart displaying the proportion of generations in Congress in 1920." width='400px'>
-        <img src="./assets/1940.png" alt="Pie chart displaying the proportion of generations in Congress in 1940." width='400px'>
-        <img src="./assets/1960.png" alt="Pie chart displaying the proportion of generations in Congress in 1960." width='400px'>
-    
-    </div>
-
-    <div style="text-align: center;">
-
-        <img src="./assets/1980.png" alt="Pie chart displaying the proportion of generations in Congress in 1980." width='400px'>
-        <img src="./assets/2000.png" alt="Pie chart displaying the proportion of generations in Congress in 2000." width='400px'>
-        <img src="./assets/2020.png" alt="Pie chart displaying the proportion of generations in Congress in 2020." width='400px'>
-    
-    </div>
-
-    <hr>
-
-    <div style="text-align: center;">
-
-    <img src="./assets/piecharts.gif" alt="Animated sequence of pie charts displaying the proportion of generations in Congress from 1920-2020." width='700px'>
-
-    </div>
-
-
-
+    <p></p>
+    <p></p>
 
 </body>
 </html>
