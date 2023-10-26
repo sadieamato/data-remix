@@ -11,6 +11,9 @@
         div {margin-top: 5%;
              margin-bottom: 5%;
              align-content: center;}
+        h1 {font-family: Georgia;}
+        h4 {font-family: Georgia;} 
+        h2 {font-family: Georgia;}
 
     </style>
     <meta charset="UTF-8">
@@ -22,32 +25,33 @@
 <body>
 
     <h1 style="text-align:center">Congress Today Is Older Than It's Ever Been</h1>
-    <h4 style="text-align:center">By Geoffrey Skelley (author) & Sadie Amato (remixer)</h4>    
+    <h4 style="text-align:center">By Geoffrey Skelley (author) & Sadie Amato (remixer)</h4>  
+    <p style="font-size: 15px;">This article remixes an original article from FiveThirtyEight, which can be found <a href="https://fivethirtyeight.com/features/aging-congress-boomers/">here</a>.</p>  
+  
+    <hr style="margin-right: 60%; width: 30%;">
 
-    <!-- <label>Bar Width:</label>
-    
-    <input type="range" id="bar-width" min="10" max="50" value="20"> -->
 
     <script src="https://d3js.org/d3.v6.js"> </script>
 
 
-    <p>Older members of Congress are notorious for their lack of familiarity with modern technology. Late last month, at least three different representatives in a hearing on TikTok 
+    <p style="margin-top: 2%;">Older members of Congress are notorious for their lack of familiarity with modern technology. Late last month, at least three different representatives in a hearing on TikTok 
         called the popular app “Tic Tac,” a breath mint available in many store checkout lines. This is only the latest in a long line of amusing tech-related congressional miscues: 
         Back in 2006, Alaska Sen. Ted Stevens described the internet as “a series of tubes,” and Senate Majority Leader Chuck Schumer copped to his struggles when in 2022 he held up 
         his flip phone and said he was “not very tech-oriented” during a speech on the Senate floor.
         </p>    
-    <p>Don’t expect such unfamiliarity to change anytime soon: As it turns out, Congress today is older than it’s ever been. Across all senators and representatives, the median age 
+    <p style="margin-bottom: 5%;">Don’t expect such unfamiliarity to change anytime soon: As it turns out, Congress today is older than it’s ever been. Across all senators and representatives, the median age 
         of the 118th Congress is 59 years old. The median senator is 65 years old, a record high; the median representative is about 58, for the fourth Congress in a row.
-        Congress has notably aged since 2001: From 1919 to 1999, the median senator never eclipsed 60 years old and the median representative never surpassed 55.2
+        Congress has notably aged since 2001: From 1919 to 1999, the median senator never eclipsed 60 years old and the median representative never surpassed 55.2.
     </p>
 
     <!-- ------------ Chart 2 ------------- -->
         
+    <h2 style="text-align:center">The House and Senate are Older than Ever Before</h2> 
     <div id="chart2"></div>
     <script>
 
     // set up the page
-    const margin2 = {top:50, right:50, bottom:50, left:50}, 
+    const margin2 = {top:5, right:50, bottom:50, left:50}, 
         width2 = 1300 - margin2.left - margin2.right,
         height2 = 800 - margin2.top - margin2.bottom;
 
@@ -92,13 +96,15 @@
         .selectAll("text")
         .attr("text-anchor", "end")
         .attr("font-family", "Georgia")
-        .attr("transform", `rotate(-45)`);
+        .attr("font-size", "12px")
+        .attr("transform", `rotate(-55)`);
 
 
         // Add y to view
         svg2.append("g")
         .call(d3.axisLeft(y))
-        .attr("font-family", "Georgia");
+        .attr("font-family", "Georgia")
+        .attr("font-size", "12px");
 
         
         // Create average age lines
@@ -121,7 +127,7 @@
             .data([data])
             .attr("class", "line")
             .attr("d", congress_line)
-            .style("stroke", "steelblue")
+            .style("stroke", "#5F9E8F")
             .style("stroke-width", 3)
             .style("fill", "none")
 
@@ -129,7 +135,7 @@
             .data([data])
             .attr("class", "line")
             .attr("d", house_line)
-            .style("stroke", "grey")
+            .style("stroke", "lightblue")
             .style("stroke-width", 3)
             .style("fill", "none")
 
@@ -137,7 +143,7 @@
             .data([data])
             .attr("class", "line")
             .attr("d", senate_line)
-            .style("stroke", "black")
+            .style("stroke", "lightgreen")
             .style("stroke-width", 3)
             .style("fill", "none")
 
@@ -173,79 +179,69 @@
             
 
         circleEnter.append("circle")
-            .attr("r", 3)
+            .attr("r", 4)
             .attr("cx", function (d) {return x(d.year);})
             .attr("cy", function (d) {return y(d.congress_avg);})
             .style("fill","none")
-            .style("stroke","steelblue")
+            .style("stroke","#5F9E8F")
             .style("pointer-events","all")
             .on("mouseover", function(e, d) {
-                console.log("Moused over");
                 return tooltip.style("visibility", "visible")
                                             .style("font-family", "Georgia")
-                                            .html("Age: " + d.congress_avg);})
+                                            .html(Math.round(d.congress_avg * 100) / 100 + " years");}) // rounding display age to 2 decimal points
             .on("mousemove", function() {
-                console.log("Mouse move");
                 return tooltip.style("top", (+d3.select(this)
-                .attr("cy")+375)+ "px")
+                .attr("cy")+472)+ "px")
                 .style("left", d3.select(this)
                 .attr("cx") + "px")
             })
             .on("mouseout", function() {
-                console.log("Moused out");
                 return tooltip.style("visibility", "hidden");
             })
-            //.append("title")
-            //.text(function(d) { return "Year: " + d.year + " Age: " + d.senate_avg; });
+
 
         // Then for senate avg    
         circleEnter.append("circle")
-            .attr("r", 3)
+            .attr("r", 4)
             .attr("cx", function (d) {return x(d.year);})
             .attr("cy", function (d) {return y(d.senate_avg);})
             .style("fill","none")
-            .style("stroke","black")
+            .style("stroke","lightgreen")
             .style("pointer-events","all")
             .on("mouseover", function(e, d) {
-                console.log("Moused over");
                 return tooltip.style("visibility", "visible")
                                             .style("font-family", "Georgia")
-                                            .html("Age: " + d.senate_avg);})
+                                            .html(Math.round(d.senate_avg * 100) / 100 + " years");}) // rounding display age to 2 decimal points
             .on("mousemove", function() {
-                console.log("Mouse move");
                 return tooltip.style("top", (+d3.select(this)
-                .attr("cy")+375) + "px")
+                .attr("cy")+472) + "px")
                 .style("left", d3.select(this)
                 .attr("cx") + "px")
             })
             .on("mouseout", function() {
-                console.log("Moused out");
                 return tooltip.style("visibility", "hidden");
             })
             
 
         // Then for house avg    
         circleEnter.append("circle")
-            .attr("r", 3)
+            .attr("r", 4)
             .attr("cx", function (d) {return x(d.year);})
             .attr("cy", function (d) {return y(d.house_avg);})
             .style("fill","none")
-            .style("stroke","grey")
+            .style("stroke","lightblue")
             .style("pointer-events","all")
             .on("mouseover", function(e, d) {
-                console.log("Moused over");
                 return tooltip.style("visibility", "visible")
                                             .style("font-family", "Georgia")
-                                            .html("Age: " + d.house_avg);})
+                                            .html(Math.round(d.house_avg * 100) / 100 + " years");}) // rounding display age to 2 decimal points
             .on("mousemove", function() {
-                console.log("Mouse move");
                 return tooltip.style("top", (+d3.select(this)
-                .attr("cy")+375) + "px")
+                .attr("cy")+472) + "px")
                 .style("left", d3.select(this)
                 .attr("cx") + "px")
             })
             .on("mouseout", function() {
-                console.log("Moused out");
                 return tooltip.style("visibility", "hidden");
             })
             
@@ -269,6 +265,45 @@
         .attr("text-anchor", "middle")
         .attr("font-family", "Georgia")
         .text("Average Age");
+
+        // Add the legend
+        svg2.append("circle")
+            .attr("cx",40)
+            .attr("cy",15)
+            .attr("r", 6)
+            .style("fill", "lightgreen")
+        svg2.append("circle")
+            .attr("cx",40)
+            .attr("cy",45)
+            .attr("r", 6)
+            .style("fill", "#5F9E8F")
+        svg2.append("circle")
+            .attr("cx",40)
+            .attr("cy",75)
+            .attr("r", 6)
+            .style("fill", "lightblue")
+        svg2.append("text")
+            .attr("x", 60)
+            .attr("y", 15)
+            .text("Senate")
+            .attr("font-family", "Georgia")
+            .style("font-size", "15px")
+            .attr("alignment-baseline","middle")
+        svg2.append("text")
+            .attr("x", 60)
+            .attr("y", 45)
+            .text("Congress")
+            .attr("font-family", "Georgia")
+            .style("font-size", "15px")
+            .attr("alignment-baseline","middle")
+        svg2.append("text")
+            .attr("x", 60)
+            .attr("y", 75)
+            .text("House of Reps")
+            .attr("font-family", "Georgia")
+            .style("font-size", "15px")
+            .attr("alignment-baseline","middle")
+
     })
 
     </script>
@@ -291,8 +326,13 @@
     in the 1960 and 1970 censuses before the median started to rise again, as it has throughout the country’s history.</p>
 
 <p>Forty-eight percent of the current Congress is made up of boomers, even though they only represented about 21 percent of the population in the most recent census. 
-    And this actually represents a decline in representation for boomers, who made up 63 percent of Congress in the mid-2010s.
+    And this actually represents a decline in representation for boomers, who made up 63 percent of Congress in the mid-2010s. 
 </p>
+
+<p>Thanks to their size, baby boomers have been an especially long-lasting force in congressional politics. Boomers are now in their 25th consecutive Congress,
+    but still make up about half the membership, putting them well ahead of earlier generations. In its 25th Congress, the Silent Generation only made up about 
+   one-third of Congress, while the earlier Lost Generation made up only around a quarter at the same point. Below, the generational shifts in Congress 
+   over time can be seen.</p>
 
 
  <!-- Pie Charts -->
@@ -323,10 +363,6 @@
 
 
 
-<p>Thanks to their size, baby boomers have been an especially long-lasting force in congressional politics. Boomers are now in their 25th consecutive Congress,
-     but still make up about half the membership, putting them well ahead of earlier generations. In its 25th Congress, the Silent Generation only made up about 
-    one-third of Congress, while the earlier Lost Generation made up only around a quarter at the same point.</p>
-
 <p>But on top of the baby boomers’ outsized congressional representation, they’re also older than their predecessors in the Lost, Greatest and Silent generations 
     were when those groups held the most sway on Capitol Hill. When boomers became a plurality of Congress in 2001, their median age was nearly 49, six years older 
     than the Silent Generation was when it became the largest generational cohort in 1979. And while the Silent Generation’s median age was 59 just before the boomers 
@@ -348,12 +384,16 @@
     And while both younger and older Americans are worried about housing, those concerns differ: Younger Americans are having a tougher time buying a home — a traditional path 
     to building wealth — than their predecessors did, while older Americans are more worried about access to assisted living to stay in their homes. </p>
 
-<p>
+<p style="margin-bottom: 5%;">
     And as concerns over “Tic Tac” suggest, an older Congress may struggle when dealing with issues related to modern technology. But it’s not like the institution has made it 
     easier for elderly members, either. Members don’t have deep expertise on every issue, so they need support staff and experts to help them, including on matters of technology. 
-    Yet Congress has reduced office and congressional support agency staff since the 1980s, and it has never created a successor to the Office of Technology Assessment, which 
-    Congress defunded in 1995 after it previously provided advice and expertise on science and technology issues.
+    Yet Congress has reduced office and congressional support agency staff since the 1980s, and it has never created a successor to the Office of Technology Assessment (OTA), which 
+    Congress defunded in 1995 after it previously provided advice and expertise on science and technology issues. According to the 
+    <a href="https://sgp.fas.org/crs/misc/R46327.pdf">Congressional Research Service</a>, the OTA's funding was steadily increasing throughout the 80s and 90s, until it was 
+    abruptly cut down nearly 30 years ago now. Perhaps, with the rapidly changing technology landscape of today, it is time to bring this office back?
 </p>
+
+<h2 style="text-align:center">OTA Funding Over Time</h2>  
 
 
 <!-- ------------ Chart 1 ------------- -->
@@ -362,7 +402,7 @@
     <script>
 
     // set up the page
-    const margin1 = {top:30, right:50, bottom:50, left:70}, 
+    const margin1 = {top:0, right:50, bottom:50, left:70}, 
         width1 = 1300 - margin1.left - margin1.right,
         height1 = 700 - margin1.top - margin1.bottom;
 
@@ -414,12 +454,14 @@
         .selectAll("text")
         .attr("text-anchor", "end")
         .attr("font-family", "Georgia")
+        .attr("font-size", "12px")
         .attr("transform", `rotate(-45)`);
 
 
         // Add y to view
         svg1.append("g")
         .call(d3.axisLeft(y))
+        .attr("font-size", "12px")
         .attr("font-family", "Georgia");
         
 
@@ -442,7 +484,7 @@
             return height1 - y(d.funds); // - y(d[1]);
         })
         .attr("fill", "#59a14f")
-        // Here I changed the opacity on click
+        // Here I changed the opacity on mouseover
         .style("opacity", .6)
         .on("mouseover", function(e, d) {
             d3.selectAll("rect")
@@ -456,16 +498,8 @@
                                             .style("font-family", "Georgia")
                                             .html("Funds: $" + d.funds + "M");})
         .on("mousemove", function(event, d) {
-            // const[x, y] = d3.pointer(event);
-            // return tooltip.style("top", y + "py")
-            //     .style("left", x + "px")
-            // return tooltip.style("top", d3.select(this)
-            // .attr("y") + "px") 
-            // .style("left", d3.select(this)
-            // .attr("x") + "py") 
-
             return tooltip.style("top", (+d3.select(this)
-            .attr("y")+3900) + "px")
+            .attr("y")+4250) + "px")
             .style("left", d3.select(this)
             .attr("x") + "px")
         })
@@ -475,16 +509,6 @@
             return tooltip.style("visibility", "hidden");
         })
 
-        // Added title here. Citation for this section: http://www.d3noob.org/2013/01/adding-title-to-your-d3js-graph.html 
-        // customized location, font, and styling
-        // svg1.append("text")
-        // .attr("x", (width1 / 2))             
-        // .attr("y", 20 - (margin1.top / 2))
-        // .attr("text-anchor", "middle")  
-        // .attr("font-family", "Georgia")
-        // .style("font-size", "25px") 
-        // .style("background-color", "gray")
-        // .text("OTA Appropriations Over Time");
 
         // Add the x-axis label
         svg1.append("text")
@@ -503,39 +527,24 @@
         .attr("text-anchor", "middle")
         .attr("font-family", "Georgia")
         .text("Appropriations per Year, in $M");
-
-        // Example of user input changing graph: 
-        // Update the bar width based on the input value
-        d3.select("#bar-width")
-        .on("input", function() { // input is given on range above in html
-          var value = this.value;
-          x.range([0, value * data.length]);
-          svg1.selectAll("rect")
-            .attr("width", x.bandwidth());
-        });
-
-
-
-
-        // where I am: currently have bars with tooltips and opacity changes with hover. have title (commented out rn) and axes labels
-        // also have gridlines that i'm pretty good with. 
-
-        // need to fix tooltip position (way too high in deployed page)
-
-        
+ 
 
     })
 
     
     </script>
 
-    <p style="margin-bottom: 5%;">Despite the rapid rise in Congress’s median age, we could see it plateau — or perhaps even tick down slightly — in the next few years as the boomers’ influence decreases.
+    <p style="margin-bottom: 2%;">Despite the rapid rise in Congress’s median age, we could see it plateau — or perhaps even tick down slightly — in the next few years as the boomers’ influence decreases.
          It’s true that the population as a whole will likely continue to get older, but it will do so at a slower rate than in the past couple of decades as boomers age out of 
          the population. Coming up behind the boomers is Gen X, which makes up 36 percent of Congress, and beyond them are millennials (10 percent), who now constitute a larger 
          segment of the overall population than boomers. And Generation Z just got its first member of Congress this year with 26-year-old Florida Rep. Maxwell Alejandro Frost. 
          The ceaseless march of time will go on, but that same time will indeed tell.</p>
 
-    <p></p>
+
+    <hr>
+    <p style="font-size: 15px;"><em><a href="https://twitter.com/geoffreyvs">Geoffrey Skelley</a></em> is a senior elections analyst at FiveThirtyEight. </p> 
+    <p style="margin-bottom: 5%; font-size: 15px;">Get the original dataset on Github <a href="https://github.com/fivethirtyeight/data/tree/master/congress-demographics">here</a> and the cleaned datasets 
+        used in the remix <a href="https://github.com/sadieamato/data-remix">here.</a></p>
     <p></p>
 
 </body>
